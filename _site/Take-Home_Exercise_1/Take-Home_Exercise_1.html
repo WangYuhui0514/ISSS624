@@ -21,6 +21,40 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
@@ -139,7 +173,20 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#overview" id="toc-overview" class="nav-link active" data-scroll-target="#overview">1 OVERVIEW</a></li>
+  <li><a href="#overview" id="toc-overview" class="nav-link active" data-scroll-target="#overview">1 OVERVIEW</a>
+  <ul class="collapse">
+  <li><a href="#objectives-and-methods" id="toc-objectives-and-methods" class="nav-link" data-scroll-target="#objectives-and-methods">1.1 Objectives and Methods</a>
+  <ul class="collapse">
+  <li><a href="#geovisualisation-and-analysis" id="toc-geovisualisation-and-analysis" class="nav-link" data-scroll-target="#geovisualisation-and-analysis"><strong>Geovisualisation and Analysis</strong></a></li>
+  <li><a href="#local-indicators-of-spatial-association-lisa-analysis" id="toc-local-indicators-of-spatial-association-lisa-analysis" class="nav-link" data-scroll-target="#local-indicators-of-spatial-association-lisa-analysis"><strong>Local Indicators of Spatial Association (LISA) Analysis</strong></a></li>
+  <li><a href="#emerging-hot-spot-analysisehsa" id="toc-emerging-hot-spot-analysisehsa" class="nav-link" data-scroll-target="#emerging-hot-spot-analysisehsa"><strong>Emerging Hot Spot Analysis(EHSA)</strong></a></li>
+  </ul></li>
+  <li><a href="#study-area" id="toc-study-area" class="nav-link" data-scroll-target="#study-area">1.2 Study Area</a></li>
+  </ul></li>
+  <li><a href="#getting-started" id="toc-getting-started" class="nav-link" data-scroll-target="#getting-started">2 GETTING STARTED</a>
+  <ul class="collapse">
+  <li><a href="#setting-the-analytical-tools" id="toc-setting-the-analytical-tools" class="nav-link" data-scroll-target="#setting-the-analytical-tools"><strong>2.1 Setting the Analytical Tools</strong></a></li>
+  </ul></li>
   </ul>
 </nav>
     </div>
@@ -171,8 +218,81 @@ ul.task-list li input[type="checkbox"] {
 
 <section id="overview" class="level1">
 <h1>1 OVERVIEW</h1>
+<p>As urban transportation and infrastructure become digitized, the resulting data sets can be used as a framework for crafting patterns of movement in space and time. These large amounts of motion data collected may contain structures and patterns that provide useful information about the characteristics of the measured phenomena. The identification, analysis and comparison of these patterns will provide deeper insights into how people move and behave within cities. These understandings will potentially contribute to better urban management and provide useful information to private and public sector urban transport service providers to make informed decisions to gain a competitive advantage.</p>
+<section id="objectives-and-methods" class="level2">
+<h2 class="anchored" data-anchor-id="objectives-and-methods">1.1 Objectives and Methods</h2>
+<p>Exploratory Spatial Data Analysis (ESDA) hold tremendous potential to address complex problems facing society. In this study, you are tasked to apply appropriate Local Indicators of Spatial Association (GLISA) and Emerging Hot Spot Analysis (EHSA) to undercover the spatial and spatio-temporal mobility patterns of public bus passengers in Singapore.</p>
+<p>This study mainly uses three methods：</p>
+<section id="geovisualisation-and-analysis" class="level3">
+<h3 class="anchored" data-anchor-id="geovisualisation-and-analysis"><strong>Geovisualisation and Analysis</strong></h3>
+<ul>
+<li><p>With reference to the time intervals provided in the table below, compute the passenger trips generated by origin at the hexagon level,</p>
+<table class="table">
+<thead>
+<tr class="header">
+<th>Peak hour period</th>
+<th>Bus tap on time</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Weekday morning peak</td>
+<td>6am to 9am</td>
+</tr>
+<tr class="even">
+<td>Weekday afternoon peak</td>
+<td>5pm to 8pm</td>
+</tr>
+<tr class="odd">
+<td>Weekend/holiday morning peak</td>
+<td>11am to 2pm</td>
+</tr>
+<tr class="even">
+<td>Weekend/holiday evening peak</td>
+<td>4pm to 7pm</td>
+</tr>
+</tbody>
+</table></li>
+<li><p>Display the geographical distribution of the passenger trips by using appropriate geovisualisation methods,</p></li>
+<li><p>Describe the spatial patterns revealed by the geovisualisation (not more than 200 words per visual).</p></li>
+</ul>
+</section>
+<section id="local-indicators-of-spatial-association-lisa-analysis" class="level3">
+<h3 class="anchored" data-anchor-id="local-indicators-of-spatial-association-lisa-analysis"><strong>Local Indicators of Spatial Association (LISA) Analysis</strong></h3>
+<ul>
+<li><p>Compute LISA of the passengers trips generate by origin at hexagon level.</p></li>
+<li><p>Display the LISA maps of the passengers trips generate by origin at hexagon level. The maps should only display the significant (i.e.&nbsp;p-value &lt; 0.05)</p></li>
+<li><p>With reference to the analysis results, draw statistical conclusions (not more than 200 words per visual).</p></li>
+</ul>
+</section>
+<section id="emerging-hot-spot-analysisehsa" class="level3">
+<h3 class="anchored" data-anchor-id="emerging-hot-spot-analysisehsa"><strong>Emerging Hot Spot Analysis(EHSA)</strong></h3>
+<p>With reference to the passenger trips by origin at the hexagon level for the four time intervals given above:</p>
+<ul>
+<li><p>Perform Mann-Kendall Test by using the spatio-temporal local Gi* values,</p></li>
+<li><p>Prepared EHSA maps of the Gi* values of the passenger trips by origin at the hexagon level. The maps should only display the significant (i.e.&nbsp;p-value &lt; 0.05).</p></li>
+<li><p>With reference to the EHSA maps and data visualisation prepared, describe the spatial patterns reveled. (not more than 250 words per cluster).</p></li>
+</ul>
+</section>
+</section>
+<section id="study-area" class="level2">
+<h2 class="anchored" data-anchor-id="study-area">1.2 Study Area</h2>
+<p>The focus of this study will be Singapore. Singapore’s public transport system is renowned for its efficient, clean, safe and timely services. The city has a comprehensive digital public transportation network that is optimized through advanced information technology and big data analytics to improve operational efficiency and passenger experience.</p>
+<p>Singapore’s urban infrastructure, such as utilities and roads, is also highly digitalized, using sensors, the Internet of Things (IoT) and other advanced technologies to monitor and manage city operations. For example, through vehicles equipped with GPS and RFID, traffic flows and patterns can be tracked, which helps in real-time traffic management and planning.</p>
+<p>These digitalization measures enable Singapore to make important progress in improving the efficiency of public services, promoting sustainable development and enhancing the quality of life of residents.</p>
+</section>
+</section>
+<section id="getting-started" class="level1">
+<h1>2 GETTING STARTED</h1>
+<section id="setting-the-analytical-tools" class="level2">
+<h2 class="anchored" data-anchor-id="setting-the-analytical-tools"><strong>2.1 Setting the Analytical Tools</strong></h2>
+<p>The code chunk below installs and loads <strong>sf</strong>, <strong>spdep</strong>, <strong>tmap</strong>, <strong>ggplot2,</strong> <strong>tidyverse, patchwork, tidyverse, readr</strong> packages into R environment. <a href="https://cran.r-project.org/web/packages/pacman/readme/README.html"><em>pacman()</em></a> is a R package management tool.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>pacman<span class="sc">::</span><span class="fu">p_load</span>(sf, spdep, tmap, ggplot2, tidyverse, patchwork, tidyverse, readr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 
 
+</section>
 </section>
 
 </main> <!-- /main -->
