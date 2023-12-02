@@ -25,6 +25,77 @@ pacman::p_load(tmap, sf, DT, stplanr,
 
 # 3 **Preparing the Flow Data**
 
-### **3.1 Importing the OD data**
+## **3.1 Importing the OD data**
 
 Firstly, we will import the *Passenger Volume by Origin Destination Bus Stops* data set downloaded from LTA DataMall by using `read_csv()` of **readr** package.
+
+```{r}
+odbus <- read_csv("data/origin_destination_bus_202310.csv")
+```
+
+```{r}
+glimpse(odbus)
+```
+
+A quick check of odbus tibble data frame shows that the values in OROGIN_PT_CODE and DESTINATON_PT_CODE are in numeric data type. Hence, the code chunk below is used to convert these data values into character data type.
+
+```{r}
+odbus$ORIGIN_PT_CODE <- as.factor(odbus$ORIGIN_PT_CODE)
+odbus$DESTINATION_PT_CODE <- as.factor(odbus$DESTINATION_PT_CODE)
+```
+
+## **3.2 Extracting the study data**
+
+For the purpose of this exercise, we will extract commuting flows on weekday and between 6 and 9 o\'clock.
+
+```{r}
+odbus6_9 <- odbus %>%
+  filter(DAY_TYPE == "WEEKDAY") %>%
+  filter(TIME_PER_HOUR >= 6 &
+           TIME_PER_HOUR <= 9) %>%
+  group_by(ORIGIN_PT_CODE,
+           DESTINATION_PT_CODE) %>%
+  summarise(TRIPS = sum(TOTAL_TRIPS))
+```
+
+Table below shows the content of odbus6_9
+
+```{r}
+datatable(odbus6_9)
+```
+
+Save the output in rds format for future used.
+
+```{r}
+write_rds(odbus6_9, "data/rds/odbus6_9.rds")
+```
+
+Import the save odbus6_9.rds into R environment.
+
+```{r}
+odbus6_9 <- read_rds("data/rds/odbus6_9.rds")
+```
+
+# **4 Working with Geospatial Data**
+
+For the purpose of this exercise, two geospatial data will be used. They are:
+
+-   BusStop: This data provides the location of bus stop as at last quarter of 2022.
+
+-   MPSZ-2019: This data provides the sub-zone boundary of URA Master Plan 2019.
+
+## **4.1 Importing geospatial data**
+
+Two geospatial data will be used in this exercise, they are:
+
+```{r}
+busstop <- st_read(dsn = "data/geospatial/",
+                   layer = "BusStop") %>%
+  st_transform(crs = 3414)
+```
+
+```{r}
+mpsz <- st_read(dsn = "data/geospatial",
+                   layer = "MasterPlan2019SubzoneNoSea") %>%
+  st_transform(crs = 3414)
+```
