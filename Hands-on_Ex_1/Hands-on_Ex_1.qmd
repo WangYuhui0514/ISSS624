@@ -320,9 +320,9 @@ qtm(mpsz_pop2020,
     fill = "DEPENDENCY")
 ```
 
-### **2.4.2 Creating a choropleth map by using *tmap*\'s elements**
+### **2.4.2 Creating a choropleth map by using *tmap*'s elements**
 
-Despite its usefulness of drawing a choropleth map quickly and easily, the disadvantge of *qtm()* is that it makes aesthetics of individual layers harder to control. To draw a high quality cartographic choropleth map as shown in the figure below, **tmap**\'s drawing elements should be used.
+Despite its usefulness of drawing a choropleth map quickly and easily, the disadvantge of *qtm()* is that it makes aesthetics of individual layers harder to control. To draw a high quality cartographic choropleth map as shown in the figure below, **tmap**'s drawing elements should be used.
 
 ```{r}
 tm_shape(mpsz_pop2020)+
@@ -395,7 +395,7 @@ Beside *alpha* argument, there are three other arguments for *tm_borders()*, the
 
 -   *lwd* = border line width. The default is 1, and
 
--   *lty* = border line type. The default is \"solid\".
+-   *lty* = border line type. The default is "solid".
 
 ### **2.4.3 Data classification methods of tmap**
 
@@ -473,7 +473,7 @@ tm_shape(mpsz_pop2020)+
   tm_borders(alpha = 0.5)
 ```
 
-To reverse the colour shading, add a \"-\" prefix.
+To reverse the colour shading, add a "-" prefix.
 
 ```{r}
 tm_shape(mpsz_pop2020)+
@@ -680,4 +680,4 @@ tm_shape(mpsz_pop2020[mpsz_pop2020$REGION_N=="CENTRAL REGION", ])+
 
 -   [Tidy data](https://cran.r-project.org/web/packages/tidyr/vignettes/tidy-data.html)
 
--   [tidyr: Easily Tidy Data with \'spread()\' and \'gather()\' Functions](https://cran.r-project.org/web/packages/tidyr/tidyr.pdf)
+-   [tidyr: Easily Tidy Data with 'spread()' and 'gather()' Functions](https://cran.r-project.org/web/packages/tidyr/tidyr.pdf)
