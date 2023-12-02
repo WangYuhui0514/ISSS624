@@ -63,3 +63,5 @@ The code chunk below installs and loads **sf**, **spdep**, **tmap**, **ggplot2,*
 ```{r}
 pacman::p_load(sf, spdep, tmap, ggplot2, tidyverse, patchwork, tidyverse, readr)
 ```
+
+1
