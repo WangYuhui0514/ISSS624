@@ -96,6 +96,6 @@ busstop <- st_read(dsn = "data/geospatial/",
 
 ```{r}
 mpsz <- st_read(dsn = "data/geospatial",
-                   layer = "MasterPlan2019SubzoneNoSea") %>%
+                   layer = "MasterPlan2019SubzoneBoundaryNoSea") %>%
   st_transform(crs = 3414)
 ```
