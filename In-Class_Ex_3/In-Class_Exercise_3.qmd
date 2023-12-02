@@ -1,4 +1,4 @@
 ---
-title: "In-Class_Exercise_3"
+title: "In-Class_Exercise_3: Calibrating Spatial Interaction Models with R"
 author: "Wang Yuhui"
 ---

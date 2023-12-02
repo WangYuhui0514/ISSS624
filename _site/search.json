@@ -110,5 +110,19 @@
     "title": "Take-Home_Exercise_1:Geospatial Analytics for Social Good",
     "section": "2.1 Setting the Analytical Tools",
     "text": "2.1 Setting the Analytical Tools\nThe code chunk below installs and loads sf, spdep, tmap, ggplot2, tidyverse, patchwork, tidyverse, readr packages into R environment. pacman() is a R package management tool.\n\npacman::p_load(sf, spdep, tmap, ggplot2, tidyverse, patchwork, tidyverse, readr)"
+  },
+  {
+    "objectID": "Hands-on_Ex_3/Hands-on_Exercise_3.html",
+    "href": "Hands-on_Ex_3/Hands-on_Exercise_3.html",
+    "title": "Hands-on Exercise 2:Processing and Visualising Flow Data",
+    "section": "",
+    "text": "1 Overview\nIn this hands-on exercise, you will learn how to build an OD matrix by using Passenger Volume by Origin Destination Bus Stops data set downloaded from LTA DataMall.\n\n\n2 Getting Started\nFor the purpose of this exercise, four r packages will be used. They are:\n\nsf for importing, integrating, processing and transforming geospatial data.\ntidyverse for importing, integrating, wrangling and visualising data.\ntmap for creating thematic maps.\n\n\npacman::p_load(tmap, sf, DT, stplanr,\n               performance,\n               ggpubr, tidyverse)\n\n\n\n3 Preparing the Flow Data\n\n3.1 Importing the OD data\nFirstly, we will import the Passenger Volume by Origin Destination Bus Stops data set downloaded from LTA DataMall by using read_csv() of readr package."
+  },
+  {
+    "objectID": "In-Class_Ex_3/data/geospatial/MPSZ-2019.html",
+    "href": "In-Class_Ex_3/data/geospatial/MPSZ-2019.html",
+    "title": "ISSS624",
+    "section": "",
+    "text": "&lt;!DOCTYPE qgis PUBLIC ‘http://mrcc.com/qgis.dtd’ ‘SYSTEM’&gt;     dataset\n\n\n        0 0     false"
   }
 ]
