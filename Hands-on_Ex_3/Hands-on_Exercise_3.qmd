@@ -46,7 +46,7 @@ odbus$DESTINATION_PT_CODE <- as.factor(odbus$DESTINATION_PT_CODE)
 
 ## **3.2 Extracting the study data**
 
-For the purpose of this exercise, we will extract commuting flows on weekday and between 6 and 9 o\'clock.
+For the purpose of this exercise, we will extract commuting flows on weekday and between 6 and 9 o'clock.
 
 ```{r}
 odbus6_9 <- odbus %>%
@@ -91,11 +91,5 @@ Two geospatial data will be used in this exercise, they are:
 ```{r}
 busstop <- st_read(dsn = "data/geospatial/",
                    layer = "BusStop") %>%
-  st_transform(crs = 3414)
-```
-
-```{r}
-mpsz <- st_read(dsn = "data/geospatial",
-                   layer = "MasterPlan2019SubzoneBoundaryNoSea") %>%
   st_transform(crs = 3414)
 ```

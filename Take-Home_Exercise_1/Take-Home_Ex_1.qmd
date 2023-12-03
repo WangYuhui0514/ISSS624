@@ -290,6 +290,38 @@ for (i in seq_along(results)) {
 ```{r}
 #| code-fold: true
 #| code-summary: "Show the code"
+rds_path <- "data/rds/"
+weekday_morning_peak_join_geometry <- readRDS(paste0(rds_path, "weekday_morning_peak_join_geometry.rds"))
+weekday_afternoon_peak_join_geometry <- readRDS(paste0(rds_path, "weekday_afternoon_peak_join_geometry.rds"))
+weekend_morning_peak_join_geometry <- readRDS(paste0(rds_path, "weekend_morning_peak_join_geometry.rds"))
+weekend_evening_peak_join_geometry <- readRDS(paste0(rds_path, "weekend_evening_peak_join_geometry.rds"))
+
+
+
+
+combined_data <- bind_rows(
+  weekday_morning_peak_join_geometry %>% mutate(period = "Weekday Morning Peak"),
+  weekday_afternoon_peak_join_geometry %>% mutate(period = "Weekday Afternoon Peak"),
+  weekend_morning_peak_join_geometry %>% mutate(period = "Weekend Morning Peak"),
+  weekend_evening_peak_join_geometry %>% mutate(period = "Weekend Evening Peak")
+)
+
+
+# Plot combined data
+ggplot(data = combined_data, 
+       aes(x = as.numeric(`TOT_TRIPS`))) +
+  geom_histogram(bins = 20, 
+                 color = "blue", 
+                 fill = "blue") +
+  facet_wrap(~period, scales = "free_y") +
+  labs(title = "Distribution of Passenger Trips during Different Time Periods",
+       x = "Total Trips",
+       y = "Frequency")
+```
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show the code"
 
 library(ggplot2)
 
