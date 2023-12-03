@@ -61,7 +61,7 @@ These digitalization measures enable Singapore to make important progress in imp
 The code chunk below installs and loads **sf**, **sfdep, magrittr,** **tidyverse, tmap, knitr, RColorBrewer, viridis** packages into R environment. [*pacman()*](https://cran.r-project.org/web/packages/pacman/readme/README.html) is a R package management tool.
 
 ```{r}
-pacman::p_load(sf, sfdep, magrittr, tidyverse, tmap, knitr, RColorBrewer, viridis)
+pacman::p_load(sf, sfdep, magrittr, tidyverse, tmap, knitr, RColorBrewer, viridis, dplyr)
 ```
 
 ## 2.2 Importing Data
@@ -286,29 +286,6 @@ for (i in seq_along(results)) {
 # 3. Exploratory Data Analysis (EDA)
 
 ## 3.1 Distribution of total trips and trips per bus stop
-
-```{r}
-#| code-fold: true
-#| code-summary: "Show the code"
-combined_data <- rbind(
-  transform(weekday_morning_peak_join_geometry, period = "Weekday Morning Peak"),
-  transform(weekday_afternoon_peak_join_geometry, period = "Weekday Afternoon Peak"),
-  transform(weekend_morning_peak_join_geometry, period = "Weekend Morning Peak"),
-  transform(weekend_evening_peak_join_geometry, period = "Weekend Evening Peak")
-)
-
-# Plot combined data
-ggplot(data = combined_data, 
-       aes(x = as.numeric(`TOT_TRIPS`))) +
-  geom_histogram(bins = 20, 
-                 color = "blue", 
-                 fill = "blue") +
-  facet_wrap(~period, scales = "free_y") +
-  labs(title = "Distribution of Passenger Trips during Different Time Periods",
-       subtitle = "Histograms show the distribution of total trips for different time periods",
-       x = "Total Trips",
-       y = "Frequency")
-```
 
 ```{r}
 #| code-fold: true
