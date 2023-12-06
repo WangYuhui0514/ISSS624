@@ -1,0 +1,358 @@
+---
+title: "Take-Home_Exercise_2"
+author: "Wang Yuhui"
+date: 2023-12-06
+date-format: long
+date-modified: "last-modified"
+---
+
+# **1 OVERVIEW**
+
+## 1.1 Background
+
+Despite the increasing amount of open data available for public consumption, significant practical research has not yet been conducted to demonstrate how these disparate data sources can be integrated, analyzed, and modeled to support policy-making decisions. There is a general lack of practical research demonstrating how geospatial data science and analytics (GDSA) can be used to support decision-making.
+
+## 1.2 Objective
+
+The purpose of this analysis is to conduct a case study to demonstrate the potential value of GDSA to integrate publicly available data from multiple sources to build a spatial interaction model to identify factors influencing public transport urban traffic patterns.
+
+### **Geospatial Data Science**
+
+-   Derive an analytical hexagon data of 325m (this distance is the perpendicular distance between the centre of the hexagon and its edges) to represent the [traffic analysis zone (TAZ)](https://tmg.utoronto.ca/files/Reports/Traffic-Zone-Guidance_March-2021_Final.pdf).
+
+-   With reference to the time intervals provided in the table below, construct an O-D matrix of commuter flows for a time interval of your choice by integrating *Passenger Volume by Origin Destination Bus Stops* and *Bus Stop Location* from [LTA DataMall](https://datamall.lta.gov.sg/content/datamall/en.html). The O-D matrix must be aggregated at the analytics hexagon level
+
+    | Peak hour period             | Bus tap on time |
+    |------------------------------|-----------------|
+    | Weekday morning peak         | 6am to 9am      |
+    | Weekday afternoon peak       | 5pm to 8pm      |
+    | Weekend/holiday morning peak | 11am to 2pm     |
+    | Weekend/holiday evening peak | 4pm to 7pm      |
+
+-   Display the O-D flows of the passenger trips by using appropriate geovisualisation methods (not more than 5 maps).
+
+-   Describe the spatial patterns revealed by the geovisualisation (not more than 100 words per visual).
+
+-   Assemble at least three propulsive and three attractiveness variables by using aspatial and geospatial from publicly available sources.
+
+-   Compute a distance matrix by using the analytical hexagon data derived earlier.
+
+### **Spatial Interaction Modelling**
+
+-   Calibrate spatial interactive models to determine factors affecting urban commuting flows at the selected time interval.
+
+-   Present the modelling results by using appropriate geovisualisation and graphical visualisation methods. (Not more than 5 visuals)
+
+-   With reference to the Spatial Interaction Model output tables, maps and data visualisation prepared, describe the modelling results. (not more than 100 words per visual).
+
+# **2 GETTING STARTED**
+
+## **2.1 Setting the Analytical Tools**
+
+The code chunk below installs and loads the various packages
+
+```{r}
+pacman::p_load(tmap, sf, DT, ggpubr, performance, tidyverse, stplanr)
+```
+
+## 2.2 Importing Data
+
+We will import the data as a first step before proceeding with data cleaning, data wrangling and data exploration for the following:
+
+**Passenger Volume**
+
+PassengerVolume is an aspatial data, we can import the data simply by using the read_csv function from tidyverse package and output it as a tibble dataframe called odbus
+
+```{r}
+odbus <- read_csv("data/aspatial/origin_destination_bus_202310.csv")
+```
+
+**Bus Stop Location**
+
+Bus Stop is a geospatial data in .shp file. We save it as a sf data frame called busstop using the st_read function of the sf package. The data is then geo-referenced to coordinates from the Singapore SVY21 coordinate system (EPSG: 3414)
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show the code"
+busstop <- st_read(dsn = "data/geospatial", 
+                   layer = "BusStop") %>%
+  st_transform(crs=3414)
+```
+
+**sub-zone boundary of URA Master Plan 2019**
+
+sub-zone boundary of URA Master Plan 2019 is a geospatial data in .shp file. We save it as a sf data frame called mpsz using the st_read function of the sf package. The data is then geo-referenced to coordinates from the Singapore SVY21 coordinate system (EPSG: 3414)
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show the code"
+mpsz <- st_read(dsn = "data/geospatial",
+                   layer = "MPSZ-2019") %>%
+  st_transform(crs = 3414)
+```
+
+```{r}
+mpsz
+```
+
+```{r}
+mpsz <- write_rds(mpsz, "data/rds/mpsz.rds")
+```
+
+## 2.3 Classify peak hours
+
+According to the time interval specified in the task, calculate the passenger travel volume generated at the departure place. Passenger itineraries by origin are saved in 4 data frames according to their respective classifications, namely:
+
+Weekday morning peak
+
+Weekday afternoon peak
+
+Weekend morning peak
+
+Weekend evening peak
+
+Save the processed data to a .rds data format file. Output files are saved in the rds subfolder. This is done to reduce load times and keep large raw files from being uploaded to GitHub.
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show the code"
+weekday_morning_peak <- odbus %>%
+  filter(DAY_TYPE == "WEEKDAY") %>%
+  filter(TIME_PER_HOUR >= 6 &
+           TIME_PER_HOUR <= 9) %>%
+  group_by(ORIGIN_PT_CODE) %>%
+  summarise(TRIPS = sum(TOTAL_TRIPS))
+
+weekday_afternoon_peak <- odbus %>%
+  filter(DAY_TYPE == "WEEKDAY") %>%
+  filter(TIME_PER_HOUR >= 17 &
+           TIME_PER_HOUR <= 20) %>%
+  group_by(ORIGIN_PT_CODE) %>%
+  summarise(TRIPS = sum(TOTAL_TRIPS))
+
+weekend_morning_peak <- odbus %>%
+  filter(DAY_TYPE == "WEEKENDS/HOLIDAY") %>%
+  filter(TIME_PER_HOUR >= 11 &
+           TIME_PER_HOUR <= 14) %>%
+  group_by(ORIGIN_PT_CODE) %>%
+  summarise(TRIPS = sum(TOTAL_TRIPS))
+
+weekend_evening_peak <- odbus %>%
+  filter(DAY_TYPE == "WEEKENDS/HOLIDAY") %>%
+  filter(TIME_PER_HOUR >= 16 &
+           TIME_PER_HOUR <= 19) %>%
+  group_by(ORIGIN_PT_CODE) %>%
+  summarise(TRIPS = sum(TOTAL_TRIPS))
+
+
+write_rds(weekday_morning_peak, "data/rds/weekday_morning_peak.rds")
+weekday_morning_peak <- read_rds("data/rds/weekday_morning_peak.rds")
+
+write_rds(weekday_afternoon_peak, "data/rds/weekday_afternoon_peak.rds")
+weekday_afternoon_peak <- read_rds("data/rds/weekday_afternoon_peak.rds")
+
+write_rds(weekend_morning_peak, "data/rds/weekend_morning_peak.rds")
+weekend_morning_peak <- read_rds("data/rds/weekend_morning_peak.rds")
+
+write_rds(weekend_evening_peak, "data/rds/weekend_evening_peak.rds")
+weekend_evening_peak <- read_rds("data/rds/weekend_evening_peak.rds")
+```
+
+# **3 Geospatial data wrangling**
+
+## 2.3 Data Wrangling
+
+### Passenger Volume
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show the code"
+glimpse(odbus)
+```
+
+Since we plan to use the bus stop code as a unique identifier when joining with other datasets, change it to a factor data type.
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show the code"
+odbus$ORIGIN_PT_CODE <- as.factor(odbus$ORIGIN_PT_CODE)
+odbus$DESTINATION_PT_CODE <- as.factor(odbus$DESTINATION_PT_CODE)
+```
+
+**Checking for Duplicates and Missing Data**
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show the code"
+duplicate <- odbus %>%
+  group_by_all() %>%
+  filter(n()>1) %>%
+  ungroup()
+duplicate
+```
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show the code"
+summary(odbus)
+```
+
+There is no missing data or duplicates.
+
+## **3.1 Combining Busstop and mpsz**
+
+Code chunk below populates the planning subzone code (i.e. SUBZONE_C) of mpsz sf data frame into busstop sf data frame.
+
+```{r}
+busstop_mpsz <- st_intersection(busstop, mpsz) %>%
+  select(BUS_STOP_N, SUBZONE_C) 
+```
+
+```{r}
+write_rds(busstop_mpsz, "data/rds/busstop_mpsz.rds")  
+```
+
+## 4.2 Creating Hexagon layer
+
+Now, I am going to create a hexagon layer:
+
+```{r}
+# cell size of layer of 250m
+area_honeycomb_grid = st_make_grid(busstop_mpsz, c(650, 650), what = "polygons", square = FALSE, crs = 3414)
+
+# To sf and add grid ID
+honeycomb_grid_sf = st_sf(area_honeycomb_grid)
+```
+
+```{r}
+st_write(honeycomb_grid_sf, "data/geospatial/hexagon.shp",append=TRUE)
+```
+
+```{r}
+hexagon <- st_read(dsn = "data/geospatial",
+                   layer = "hexagon") %>%
+  st_transform(crs = 3414)
+```
+
+## 4.3 Combine Hexagon and Busstop_Mpzx
+
+Next, we are going to combine the datset busstop_mpsz and hexagon
+
+```{r}
+od_data <- st_join(busstop_mpsz , hexagon,
+            by = c("geometry" = "geometry")) 
+```
+
+## 4.4 Combine odbus6_9 with od_data
+
+```{r}
+od_data_1 <- left_join(odbus6_9 , od_data,
+            by = c("ORIGIN_PT_CODE" = "BUS_STOP_N")) %>%
+  rename(ORIGIN_BS = ORIGIN_PT_CODE,
+         ORIGIN_SZ = SUBZONE_C,
+         DESTIN_BS = DESTINATION_PT_CODE)
+```
+
+Before continue, it is a good practice for us to check for duplicating records.
+
+```{r}
+duplicate <- od_data_1 %>%
+  group_by_all() %>%
+  filter(n()>1) %>%
+  ungroup()
+```
+
+If duplicated records are found, the code chunk below will be used to retain the unique records.
+
+```{r}
+od_data_1 <- unique(od_data_1)
+```
+
+It will be a good practice to confirm if the duplicating records issue has been addressed fully.
+
+Next, we will update od_data data frame with the planning subzone codes
+
+```{r}
+od_data_2 <- left_join(od_data_1 , od_data,
+            by = c("DESTIN_BS" = "BUS_STOP_N")) 
+```
+
+```{r}
+duplicate <- od_data_2 %>%
+  group_by_all() %>%
+  filter(n()>1) %>%
+  ungroup()
+```
+
+```{r}
+od_data_2 <- unique(od_data_2)
+```
+
+```{r}
+od_data_2 <- od_data_2 %>%
+  rename(DESTIN_SZ = SUBZONE_C) %>%
+  drop_na() %>%
+  group_by(ORIGIN_SZ, DESTIN_SZ) %>%
+  summarise(MORNING_PEAK = sum(TRIPS))
+```
+
+It is time to save the output into an rds file format.
+
+```{r}
+write_rds(od_data_2, "data/rds/od_data_2.rds")
+```
+
+```{r}
+od_data_2 <- read_rds("data/rds/od_data_2.rds")
+```
+
+## **5 Visualising Spatial Interaction**
+
+## **5.1 Removing intra-zonal flows**
+
+I will not plot the intra-zonal flows. The code chunk below will be used to remove intra-zonal flows.
+
+```{r}
+od_data_3 <- od_data_2[od_data_2$ORIGIN_SZ!=od_data_2$DESTIN_SZ,]
+```
+
+## 5.2 **Creating desire lines**
+
+In this code chunk below, `od2line()` of **stplanr** package is used to create the desire lines.
+
+```{r}
+flowLine <- od2line(flow = od_data_3, 
+                    zones = mpsz,
+                    zone_code = "SUBZONE_C")
+```
+
+## 5.3 **Visualising the desire lines**
+
+To visualise the resulting desire lines, the code chunk below is used.
+
+```{r}
+tm_shape(mpsz) +
+  tm_polygons() +
+flowLine %>%  
+tm_shape() +
+  tm_lines(lwd = "MORNING_PEAK",
+           style = "quantile",
+           scale = c(0.1, 1, 3, 5, 7, 10),
+           n = 6,
+           alpha = 0.3)
+```
+
+When the flow data are very messy and highly skewed like the one shown above, it is wiser to focus on selected flows, for example flow greater than or equal to 5000 as shown below.
+
+```{r}
+tm_shape(mpsz) +
+  tm_polygons() +
+flowLine %>%  
+  filter(MORNING_PEAK >= 5000) %>%
+tm_shape() +
+  tm_lines(lwd = "MORNING_PEAK",
+           style = "quantile",
+           scale = c(0.1, 1, 3, 5, 7, 10),
+           n = 6,
+           alpha = 0.3)
+```
