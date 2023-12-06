@@ -158,11 +158,9 @@ write_rds(weekend_evening_peak, "data/rds/weekend_evening_peak.rds")
 weekend_evening_peak <- read_rds("data/rds/weekend_evening_peak.rds")
 ```
 
-# **3 Geospatial data wrangling**
+# **3 data wrangling**
 
-## 2.3 Data Wrangling
-
-### Passenger Volume
+## 3.1 Passenger Volume
 
 ```{r}
 #| code-fold: true
@@ -199,7 +197,7 @@ summary(odbus)
 
 There is no missing data or duplicates.
 
-## **3.1 Combining Busstop and mpsz**
+## **3.2 Combining Busstop and mpsz**
 
 Code chunk below populates the planning subzone code (i.e. SUBZONE_C) of mpsz sf data frame into busstop sf data frame.
 
@@ -212,7 +210,7 @@ busstop_mpsz <- st_intersection(busstop, mpsz) %>%
 write_rds(busstop_mpsz, "data/rds/busstop_mpsz.rds")  
 ```
 
-## 4.2 Creating Hexagon layer
+## 3.3 Creating Hexagon layer
 
 Now, I am going to create a hexagon layer:
 
@@ -234,7 +232,7 @@ hexagon <- st_read(dsn = "data/geospatial",
   st_transform(crs = 3414)
 ```
 
-## 4.3 Combine Hexagon and Busstop_Mpzx
+## 4.3 Combine Hexagon and Busstop_Mpsz
 
 Next, we are going to combine the datset busstop_mpsz and hexagon
 
