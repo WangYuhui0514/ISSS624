@@ -1,6 +1,6 @@
 ---
-title: "Hands-on Exercise 2.1: Spatial Weights and Applications"
-author: Wang Yuhui
+title: "Hands-on Exercise 2: Spatial Weights and Applications"
+author: "Wang Yuhui"
 ---
 
 # 1 Overview
