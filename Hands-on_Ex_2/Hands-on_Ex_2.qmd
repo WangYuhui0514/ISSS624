@@ -158,14 +158,14 @@ head(coords)
 
 ### 5.3.1 Plotting Queen contiguity based neighbours map
 
-```{r my-plot, fig.width=21, fig.height=14}
+```{r fig.width=21, fig.height=14}
 plot(hunan$geometry, border="lightgrey")
 plot(wm_q, coords, pch = 19, cex = 0.6, add = TRUE, col= "red")
 ```
 
 ### 5.3.2 Plotting Rook contiguity based neighbours map
 
-```{r my-plot, fig.width=21, fig.height=14}
+```{r fig.width=21, fig.height=14}
 plot(hunan$geometry, border="lightgrey")
 plot(wm_r, coords, pch = 19, cex = 0.6, add = TRUE, col = "red")
 
@@ -173,7 +173,7 @@ plot(wm_r, coords, pch = 19, cex = 0.6, add = TRUE, col = "red")
 
 ### 5.3.3 Plotting both Queen and Rook contiguity based neighbours maps
 
-```{r my-plot, fig.width=21, fig.height=14}
+```{r fig.width=21, fig.height=14}
 par(mfrow=c(1,2))
 plot(hunan$geometry, border="lightgrey", main="Queen Contiguity")
 plot(wm_q, coords, pch = 19, cex = 0.6, add = TRUE, col= "red")
@@ -244,7 +244,7 @@ table(n_comp$comp.id)
 
 Next, we will plot the distance weight matrix by using the code chunk below.
 
-```{r my-plot, fig.width=21, fig.height=14}
+```{r  fig.width=21, fig.height=14}
 plot(hunan$geometry, border="lightgrey")
 plot(wm_d62, coords, add=TRUE)
 plot(k1, coords, add=TRUE, col="red", length=0.8)
@@ -254,7 +254,7 @@ plot(k1, coords, add=TRUE, col="red", length=0.8)
 
 Alternatively, we can plot both of them next to each other by using the code chunk below.
 
-```{r my-plot, fig.width=21, fig.height=14}
+```{r  fig.width=21, fig.height=14}
 par(mfrow=c(1,2))
 plot(hunan$geometry, border="lightgrey", main="1st nearest neighbours")
 plot(k1, coords, add=TRUE, col="red", length=0.08)
@@ -283,7 +283,7 @@ str(knn6)
 
 We can plot the weight matrix using the code chunk below.
 
-```{r my-plot, fig.width=21, fig.height=14}
+```{r fig.width=21, fig.height=14}
 plot(hunan$geometry, border="lightgrey")
 plot(knn6, coords, pch = 19, cex = 0.6, add = TRUE, col = "red")
 ```

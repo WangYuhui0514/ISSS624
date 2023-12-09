@@ -1,9 +1,6 @@
 ---
 title: "Take-Home_Exercise_2"
 author: "Wang Yuhui"
-date: 2023-12-06
-date-format: long
-date-modified: "last-modified"
 ---
 
 # **1 OVERVIEW**
