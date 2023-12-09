@@ -13,7 +13,7 @@ Despite the increasing amount of open data available for public consumption, sig
 
 The purpose of this analysis is to conduct a case study to demonstrate the potential value of GDSA to integrate publicly available data from multiple sources to build a spatial interaction model to identify factors influencing public transport urban traffic patterns.
 
-### **Geospatial Data Science**
+### **1.2.1 Geospatial Data Science**
 
 -   Derive an analytical hexagon data of 325m (this distance is the perpendicular distance between the centre of the hexagon and its edges) to represent the [traffic analysis zone (TAZ)](https://tmg.utoronto.ca/files/Reports/Traffic-Zone-Guidance_March-2021_Final.pdf).
 
@@ -34,7 +34,7 @@ The purpose of this analysis is to conduct a case study to demonstrate the poten
 
 -   Compute a distance matrix by using the analytical hexagon data derived earlier.
 
-### **Spatial Interaction Modelling**
+### **1.2.2 Spatial Interaction Modelling**
 
 -   Calibrate spatial interactive models to determine factors affecting urban commuting flows at the selected time interval.
 
@@ -229,7 +229,7 @@ hexagon <- st_read(dsn = "data/geospatial",
   st_transform(crs = 3414)
 ```
 
-## 4.3 Combine Hexagon and Busstop_Mpsz
+## 3.4 Combine Hexagon and Busstop_Mpsz
 
 Next, we are going to combine the datset busstop_mpsz and hexagon
 
@@ -238,7 +238,7 @@ od_data <- st_join(busstop_mpsz , hexagon,
             by = c("geometry" = "geometry")) 
 ```
 
-## 4.4 Combine Peak data with od_data
+## 3.5 Combine Peak data with od_data
 
 ```{r}
 od_day_m <- left_join(weekday_morning_peak , od_data,
@@ -355,9 +355,9 @@ od_end_m <- read_rds("data/rds/od_end_m.rds")
 od_end_a <- read_rds("data/rds/od_end_a.rds")
 ```
 
-## **5 Visualising Spatial Interaction**
+# **4 Visualising Spatial Interaction**
 
-## **5.1 Removing intra-zonal flows**
+## **4.1 Removing intra-zonal flows**
 
 I will not plot the intra-zonal flows. The code chunk below will be used to remove intra-zonal flows.
 
@@ -368,7 +368,7 @@ od_end_m <- od_end_m[od_end_m$ORIGIN_SZ!=od_end_m$DESTIN_SZ,]
 od_end_a <- od_end_a[od_end_a$ORIGIN_SZ!=od_end_a$DESTIN_SZ,]
 ```
 
-## 5.2 **Creating desire lines**
+## 4.2 **Creating desire lines**
 
 In this code chunk below, `od2line()` of **stplanr** package is used to create the desire lines.
 
@@ -387,7 +387,7 @@ flowLine_end_a <- od2line(flow = od_end_a,
                     zone_code = "SUBZONE_C")
 ```
 
-## 5.3 **Visualising the desire lines**
+## 4.3 **Visualising the desire lines**
 
 To visualise the resulting desire lines, the code chunk below is used.
 
