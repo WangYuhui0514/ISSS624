@@ -23,6 +23,7 @@ website:
           - text: In-class Exercise 2
           - text: In-class Exercise 3
           - text: In-class Exercise 4
+            href: In-Class_Ex_4/In-Class_Ex_4.qmd
           - text: In-class Exercise 5
       - text: Take-Home Exercise
         menu: 
