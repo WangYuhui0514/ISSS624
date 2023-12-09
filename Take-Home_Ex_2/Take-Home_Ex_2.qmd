@@ -272,16 +272,34 @@ od_end_a <- left_join(weekday_afternoon_peak , od_data,
 Before continue, it is a good practice for us to check for duplicating records.
 
 ```{r}
+#| code-fold: true
+#| code-summary: "Show the code"
 duplicate <- od_day_m %>%
   group_by_all() %>%
   filter(n()>1) %>%
   ungroup()
+duplicate <- od_day_a %>%
+  group_by_all() %>%
+  filter(n()>1) %>%
+  ungroup()
+duplicate <- od_end_m %>%
+  group_by_all() %>%
+  filter(n()>1) %>%
+  ungroup()
+duplicate <- od_end_a %>%
+  group_by_all() %>%
+  filter(n()>1) %>%
+  ungroup()
+
 ```
 
 If duplicated records are found, the code chunk below will be used to retain the unique records.
 
 ```{r}
 od_day_m <- unique(od_day_m)
+od_day_a <- unique(od_day_a)
+od_end_m <- unique(od_end_m)
+od_end_a <- unique(od_end_a)
 ```
 
 It will be a good practice to confirm if the duplicating records issue has been addressed fully.
@@ -291,24 +309,53 @@ Next, we will update od_data data frame with the planning subzone codes
 ```{r}
 od_day_m <- left_join(od_day_m , od_data,
             by = c("DESTIN_BS" = "BUS_STOP_N")) 
+od_day_a <- left_join(od_day_a , od_data,
+            by = c("DESTIN_BS" = "BUS_STOP_N")) 
+od_end_m <- left_join(od_end_m , od_data,
+            by = c("DESTIN_BS" = "BUS_STOP_N")) 
+od_end_a <- left_join(od_end_a , od_data,
+            by = c("DESTIN_BS" = "BUS_STOP_N")) 
 ```
 
 ```{r}
+#| code-fold: true
+#| code-summary: "Show the code"
 od_day_m <- od_day_m %>%
   rename(DESTIN_SZ = SUBZONE_C) %>%
   drop_na() %>%
   group_by(ORIGIN_SZ, DESTIN_SZ) %>%
   summarise(MORNING_PEAK = sum(TRIPS))
+od_day_a <- od_day_a %>%
+  rename(DESTIN_SZ = SUBZONE_C) %>%
+  drop_na() %>%
+  group_by(ORIGIN_SZ, DESTIN_SZ) %>%
+  summarise(AFTERNOON_PEAK = sum(TRIPS))
+od_end_m <- od_end_m %>%
+  rename(DESTIN_SZ = SUBZONE_C) %>%
+  drop_na() %>%
+  group_by(ORIGIN_SZ, DESTIN_SZ) %>%
+  summarise(MORNING_PEAK = sum(TRIPS))
+od_end_a <- od_end_a %>%
+  rename(DESTIN_SZ = SUBZONE_C) %>%
+  drop_na() %>%
+  group_by(ORIGIN_SZ, DESTIN_SZ) %>%
+  summarise(AFTERNOON_PEAK = sum(TRIPS))
 ```
 
 It is time to save the output into an rds file format.
 
 ```{r}
 write_rds(od_day_m, "data/rds/od_day_m.rds")
+write_rds(od_day_a, "data/rds/od_day_a.rds")
+write_rds(od_end_m, "data/rds/od_end_m.rds")
+write_rds(od_end_a, "data/rds/od_end_a.rds")
 ```
 
 ```{r}
 od_day_m <- read_rds("data/rds/od_day_m.rds")
+od_day_a <- read_rds("data/rds/od_day_a.rds")
+od_end_m <- read_rds("data/rds/od_end_m.rds")
+od_end_a <- read_rds("data/rds/od_end_a.rds")
 ```
 
 ## **5 Visualising Spatial Interaction**
@@ -319,6 +366,9 @@ I will not plot the intra-zonal flows. The code chunk below will be used to remo
 
 ```{r}
 od_day_m <- od_day_m[od_day_m$ORIGIN_SZ!=od_day_m$DESTIN_SZ,]
+od_day_a <- od_day_a[od_day_a$ORIGIN_SZ!=od_day_a$DESTIN_SZ,]
+od_end_m <- od_end_m[od_end_m$ORIGIN_SZ!=od_end_m$DESTIN_SZ,]
+od_end_a <- od_end_a[od_end_a$ORIGIN_SZ!=od_end_a$DESTIN_SZ,]
 ```
 
 ## 5.2 **Creating desire lines**
@@ -329,6 +379,15 @@ In this code chunk below, `od2line()` of **stplanr** package is used to crea
 flowLine_day_m <- od2line(flow = od_day_m, 
                     zones = mpsz,
                     zone_code = "SUBZONE_C")
+flowLine_day_a <- od2line(flow = od_day_a, 
+                    zones = mpsz,
+                    zone_code = "SUBZONE_C")
+flowLine_end_m <- od2line(flow = od_end_m, 
+                    zones = mpsz,
+                    zone_code = "SUBZONE_C")
+flowLine_end_a <- od2line(flow = od_end_a, 
+                    zones = mpsz,
+                    zone_code = "SUBZONE_C")
 ```
 
 ## 5.3 **Visualising the desire lines**
@@ -336,28 +395,142 @@ flowLine_day_m <- od2line(flow = od_day_m,
 To visualise the resulting desire lines, the code chunk below is used.
 
 ```{r}
+#| code-fold: true
+#| code-summary: "Show the code"
 mapex <- st_bbox(hexagon)
 
 tm_shape(mpsz, bbox = mapex) +
   tm_polygons() +
-flowLine_day_m %>%  
-tm_shape() +
+tm_shape(flowLine_day_m) +
   tm_lines(lwd = "MORNING_PEAK",
+           col = "blue",
            style = "quantile",
            scale = c(0.1, 1, 3, 5, 7, 10),
            n = 6,
-           alpha = 0.8)
+           alpha = 0.8) +
+tm_layout(outer.margins = c(0, 0, 0., 0), 
+          legend.position = c("right", "bottom"),  
+          legend.frame = TRUE,
+          legend.outside = TRUE) 
+```
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show the code"
+mapex <- st_bbox(hexagon)
+tm_shape(mpsz, bbox = mapex) +
+  tm_polygons() +
+tm_shape(flowLine_day_a) +  
+  tm_lines(lwd = "AFTERNOON_PEAK",
+           col = "purple",
+           style = "quantile",
+           scale = c(0.1, 1, 3, 5, 7, 10),
+           n = 6,
+           alpha = 0.8) +
+tm_layout(outer.margins = c(0, 0, 0., 0), 
+          legend.position = c("right", "bottom"),  
+          legend.frame = TRUE,
+          legend.outside = TRUE) 
+```
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show the code"
+mapex <- st_bbox(hexagon)
+tm_shape(mpsz, bbox = mapex) +
+  tm_polygons() +  
+tm_shape(flowLine_end_m) +  
+  tm_lines(lwd = "MORNING_PEAK",
+           col = "red",
+           style = "quantile",
+           scale = c(0.1, 1, 3, 5, 7, 10),
+           n = 6,
+           alpha = 0.8) +
+tm_layout(outer.margins = c(0, 0, 0., 0), 
+          legend.position = c("right", "bottom"),  
+          legend.frame = TRUE,
+          legend.outside = TRUE) 
+```
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show the code"
+mapex <- st_bbox(hexagon)
+tm_shape(mpsz, bbox = mapex) +
+  tm_polygons() +  
+tm_shape(flowLine_end_a) +  
+  tm_lines(lwd = "AFTERNOON_PEAK",
+           col = "black",  
+           style = "quantile",
+           scale = c(0.1, 1, 3, 5, 7, 10),
+           n = 6,
+           alpha = 0.8) +
+tm_layout(outer.margins = c(0, 0, 0., 0), 
+          legend.position = c("right", "bottom"),  
+          legend.frame = TRUE,
+          legend.outside = TRUE) 
 ```
 
 When the flow data are very messy and highly skewed like the one shown above, it is wiser to focus on selected flows, for example flow greater than or equal to 5000 as shown below.
 
 ```{r}
+#| code-fold: true
+#| code-summary: "Show the code"
 tm_shape(mpsz) +
   tm_polygons() +
 flowLine_day_m %>%  
   filter(MORNING_PEAK >= 5000) %>%
 tm_shape() +
   tm_lines(lwd = "MORNING_PEAK",
+           col = "blue",
+           style = "quantile",
+           scale = c(0.1, 1, 3, 5, 7, 10),
+           n = 6,
+           alpha = 1)
+```
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show the code"
+tm_shape(mpsz) +
+  tm_polygons() +
+flowLine_day_a %>%  
+  filter(AFTERNOON_PEAK >= 5000) %>%
+tm_shape() +
+  tm_lines(lwd = "AFTERNOON_PEAK",
+           col = "purple",
+           style = "quantile",
+           scale = c(0.1, 1, 3, 5, 7, 10),
+           n = 6,
+           alpha = 1)
+```
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show the code"
+tm_shape(mpsz) +
+  tm_polygons() +
+flowLine_end_m %>%  
+  filter(MORNING_PEAK >= 5000) %>%
+tm_shape() +
+  tm_lines(lwd = "MORNING_PEAK",
+           col = "red",
+           style = "quantile",
+           scale = c(0.1, 1, 3, 5, 7, 10),
+           n = 6,
+           alpha = 1)
+```
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show the code"
+tm_shape(mpsz) +
+  tm_polygons() +
+flowLine_end_a %>%  
+  filter(AFTERNOON_PEAK >= 5000) %>%
+tm_shape() +
+  tm_lines(lwd = "AFTERNOON_PEAK",
+           col = "black",
            style = "quantile",
            scale = c(0.1, 1, 3, 5, 7, 10),
            n = 6,
