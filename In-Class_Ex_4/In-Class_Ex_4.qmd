@@ -40,9 +40,6 @@ for(postcode in postcodes){
     not_found = data.frame(postcode)
   }
 }
-```
-
-```{r}
 merged = merge(csv, found, by.x= 'postal_code', by.y = 'results.POSTAL', all=TRUE)
 write.csv(merged, file = "data/aspatial/schools.csv")
 write.csv(not_found, file = "data/aspatial/not_found.csv")
@@ -70,8 +67,26 @@ Note: Zhenghua Secondary School missing. Manually update latitude and longitude 
 -   Longitude: 103.7651
 
 ```{r}
+url <- "https://www.onemap.gov.sg/api/common/elastic/search"
 
-merged <- merged %>%
+csv <- read_csv("data/aspatial/Generalinformationofschools.csv")
+postcodes <- csv$`postal_code`
+
+found <- data.frame()
+not_found <- data.frame()
+
+for(postcode in postcodes){
+  query<-list('searchVal'=postcode,'returnGeom'='Y','getAddrDetails'='Y', 'pageNum'='1')
+  res <- GET(url,query=query)
+  
+  if((content(res)$found)!=0){
+    found <- rbind(found, data.frame(content(res))[4:13])
+  } else{
+    not_found = data.frame(postcode)
+  }
+}
+merged = merge(csv, found, by.x= 'postal_code', by.y = 'results.POSTAL', all=TRUE)
+merged1 <- merged %>%
   mutate(
     results.LATITUDE = ifelse(school_name == "ZHENGHUA SECONDARY SCHOOL", 1.389279, results.LATITUDE),
     results.LONGITUDE = ifelse(school_name == "ZHENGHUA SECONDARY SCHOOL", 103.7651, results.LONGITUDE)
@@ -79,8 +94,7 @@ merged <- merged %>%
 ```
 
 ```{r}
-
-schools <- merged %>%
+schools <- merged1 %>%
   rename(latitude = "results.LATITUDE", longitude = "results.LONGITUDE") %>%
   select(postal_code, school_name, latitude, longitude)
 ```
