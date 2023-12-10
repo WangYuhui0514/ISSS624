@@ -1,0 +1,110 @@
+---
+title: "Untitled"
+---
+
+## 8.4 **Doubly constrained model**
+
+```{r}
+dbcSIM_Poisson <- glm(formula = FlowNoIntra ~ 
+                  FID.x +
+                  FID.y +
+                  log(SCHOOL_COUNT)+
+                  log(BUSINESS_COUNT)+
+                  log(ENTERTN_COUNT)+
+                  log(HDB_COUNT)+
+                  log(FB_COUNT)+
+                  log(FINANCE_COUNT)+
+                  log(LR_COUNT)+
+                  log(RETAIL_COUNT)+
+                  log(dist),
+              family = poisson(link = "log"),
+              data = inter_zonal_flow,
+              na.action = na.exclude)
+summary(dbcSIM_Poisson)
+```
+
+```{r}
+CalcRSquared(dbcSIM_Poisson$data$MORNING_PEAK,
+             dbcSIM_Poisson$fitted.values)
+```
+
+# 8.5 **Model comparison**
+
+## 8.5.1 **Statistical measures**
+
+First of all, let us create a list called *model_list* by using the code chunk below.
+
+```{r}
+model_list <- list(
+  Origin_Constrained = orcSIM,
+  Doubly_Constrained = dbcSIM_Poisson)
+```
+
+Next, we will compute the RMSE of all the models in *model_list* file by using the code chunk below.
+
+```{r}
+compare_performance(model_list,
+                    metrics = "RMSE")
+```
+
+The print above reveals that doubly constrained SIM is the best model among the two SIMs because it has the smallest RMSE value of 970.640.
+
+## 8.5.2 **Visualising fitted values**
+
+Firstly we will extract the fitted values from Origin-constrained Model by using the code chunk below.
+
+```{r}
+df <- as.data.frame(orcSIM$fitted.values) %>%
+  round(digits = 0)
+```
+
+Next, we will append the fitted values into *inter_zonal_flow* data frame by using the code chunk below.
+
+```{r}
+inter_zonal_flow <- inter_zonal_flow %>%
+  cbind(df) %>%
+  rename(orcTRIPS = "orcSIM$fitted.values")
+```
+
+I will do the same for dbcSIM_Poisson
+
+```{r}
+df1 <- as.data.frame(dbcSIM_Poisson$fitted.values) %>%
+  round(digits = 0)
+```
+
+```{r}
+inter_zonal_flow <- inter_zonal_flow %>%
+  cbind(df1) %>%
+  rename(dbcTRIPS = "dbcSIM_Poisson$fitted.values")
+```
+
+Next, two scatterplots will be created by using [`geom_point()`](https://ggplot2.tidyverse.org/reference/geom_point.html) and other appropriate functions of [**ggplot2**](https://ggplot2.tidyverse.org/) package.
+
+```{r}
+orc_p <- ggplot(data = inter_zonal_flow,
+                aes(x = orcTRIPS,
+                    y = MORNING_PEAK)) +
+  geom_point() +
+  geom_smooth(method = lm) +
+  coord_cartesian(xlim=c(0,100000),
+                  ylim=c(0,100000))
+
+dbc_p <- ggplot(data = inter_zonal_flow,
+                aes(x = dbcTRIPS,
+                    y = MORNING_PEAK)) +
+  geom_point() +
+  geom_smooth(method = lm) +
+  coord_cartesian(xlim=c(0,100000),
+                  ylim=c(0,100000))
+```
+
+Now, we will put all the graphs into a single visual for better comparison by using the code chunk below.
+
+```{r}
+ggarrange(orc_p, dbc_p,
+          ncol = 2,
+          nrow = 1)
+```
+
+# 9 Modelling Results

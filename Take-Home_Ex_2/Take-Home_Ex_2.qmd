@@ -155,7 +155,7 @@ write_rds(weekend_evening_peak, "data/rds/weekend_evening_peak.rds")
 weekend_evening_peak <- read_rds("data/rds/weekend_evening_peak.rds")
 ```
 
-# **3 data wrangling**
+# **3 DATA WRANGLING**
 
 ## 3.1 Passenger Volume
 
@@ -213,7 +213,7 @@ Now, I am going to create a hexagon layer:
 
 ```{r}
 # cell size of layer of 250m
-area_honeycomb_grid = st_make_grid(busstop_mpsz, c(650, 650), what = "polygons", square = FALSE, crs = 3414)
+area_honeycomb_grid = st_make_grid(busstop_mpsz, c(750, 750), what = "polygons", square = FALSE, crs = 3414)
 
 # To sf and add grid ID
 honeycomb_grid_sf = st_sf(area_honeycomb_grid)
@@ -238,9 +238,25 @@ od_data <- st_join(busstop_mpsz , hexagon,
             by = c("geometry" = "geometry")) 
 ```
 
+```{r}
+hexagon_busstop <- st_join(hexagon, busstop, by = c("FID" = "FID"))
+```
+
+```{r}
+hexagon_busstop <- hexagon_busstop %>%
+  drop_na() %>%
+  group_by(FID)
+```
+
+```{r}
+write_rds(hexagon_busstop, "data/rds/hexagon_busstop.rds")
+```
+
 ## 3.5 Combine Peak data with od_data
 
 ```{r}
+#| code-fold: true
+#| code-summary: "Show the code"
 od_day_m <- left_join(weekday_morning_peak , od_data,
             by = c("ORIGIN_PT_CODE" = "BUS_STOP_N")) %>%
   rename(ORIGIN_BS = ORIGIN_PT_CODE,
@@ -293,10 +309,12 @@ duplicate <- od_end_a %>%
 If duplicated records are found, the code chunk below will be used to retain the unique records.
 
 ```{r}
-od_day_m <- unique(od_day_m)
-od_day_a <- unique(od_day_a)
-od_end_m <- unique(od_end_m)
-od_end_a <- unique(od_end_a)
+#| code-fold: true
+#| code-summary: "Show the code"
+od_day_m0 <- unique(od_day_m)
+od_day_a0 <- unique(od_day_a)
+od_end_m0 <- unique(od_end_m)
+od_end_a0 <- unique(od_end_a)
 ```
 
 It will be a good practice to confirm if the duplicating records issue has been addressed fully.
@@ -304,35 +322,37 @@ It will be a good practice to confirm if the duplicating records issue has been 
 Next, we will update od_data data frame with the planning subzone codes
 
 ```{r}
-od_day_m <- left_join(od_day_m , od_data,
+#| code-fold: true
+#| code-summary: "Show the code"
+od_day_m1 <- left_join(od_day_m0 , od_data,
             by = c("DESTIN_BS" = "BUS_STOP_N")) 
-od_day_a <- left_join(od_day_a , od_data,
+od_day_a1 <- left_join(od_day_a0 , od_data,
             by = c("DESTIN_BS" = "BUS_STOP_N")) 
-od_end_m <- left_join(od_end_m , od_data,
+od_end_m1 <- left_join(od_end_m0 , od_data,
             by = c("DESTIN_BS" = "BUS_STOP_N")) 
-od_end_a <- left_join(od_end_a , od_data,
+od_end_a1 <- left_join(od_end_a0 , od_data,
             by = c("DESTIN_BS" = "BUS_STOP_N")) 
 ```
 
 ```{r}
 #| code-fold: true
 #| code-summary: "Show the code"
-od_day_m <- od_day_m %>%
+od_day_m2 <- od_day_m1 %>%
   rename(DESTIN_SZ = SUBZONE_C) %>%
   drop_na() %>%
   group_by(ORIGIN_SZ, DESTIN_SZ) %>%
   summarise(MORNING_PEAK = sum(TRIPS))
-od_day_a <- od_day_a %>%
+od_day_a2 <- od_day_a1 %>%
   rename(DESTIN_SZ = SUBZONE_C) %>%
   drop_na() %>%
   group_by(ORIGIN_SZ, DESTIN_SZ) %>%
   summarise(AFTERNOON_PEAK = sum(TRIPS))
-od_end_m <- od_end_m %>%
+od_end_m2 <- od_end_m1 %>%
   rename(DESTIN_SZ = SUBZONE_C) %>%
   drop_na() %>%
   group_by(ORIGIN_SZ, DESTIN_SZ) %>%
   summarise(MORNING_PEAK = sum(TRIPS))
-od_end_a <- od_end_a %>%
+od_end_a2 <- od_end_a1 %>%
   rename(DESTIN_SZ = SUBZONE_C) %>%
   drop_na() %>%
   group_by(ORIGIN_SZ, DESTIN_SZ) %>%
@@ -342,30 +362,36 @@ od_end_a <- od_end_a %>%
 It is time to save the output into an rds file format.
 
 ```{r}
-write_rds(od_day_m, "data/rds/od_day_m.rds")
-write_rds(od_day_a, "data/rds/od_day_a.rds")
-write_rds(od_end_m, "data/rds/od_end_m.rds")
-write_rds(od_end_a, "data/rds/od_end_a.rds")
+#| code-fold: true
+#| code-summary: "Show the code"
+write_rds(od_day_m2, "data/rds/od_day_m.rds")
+write_rds(od_day_a2, "data/rds/od_day_a.rds")
+write_rds(od_end_m2, "data/rds/od_end_m.rds")
+write_rds(od_end_a2, "data/rds/od_end_a.rds")
 ```
 
 ```{r}
-od_day_m <- read_rds("data/rds/od_day_m.rds")
-od_day_a <- read_rds("data/rds/od_day_a.rds")
-od_end_m <- read_rds("data/rds/od_end_m.rds")
-od_end_a <- read_rds("data/rds/od_end_a.rds")
+#| code-fold: true
+#| code-summary: "Show the code"
+od_day_m3 <- read_rds("data/rds/od_day_m.rds")
+od_day_a3 <- read_rds("data/rds/od_day_a.rds")
+od_end_m3 <- read_rds("data/rds/od_end_m.rds")
+od_end_a3 <- read_rds("data/rds/od_end_a.rds")
 ```
 
-# **4 Visualising Spatial Interaction**
+# **4 VISUALIZING**
 
 ## **4.1 Removing intra-zonal flows**
 
 I will not plot the intra-zonal flows. The code chunk below will be used to remove intra-zonal flows.
 
 ```{r}
-od_day_m <- od_day_m[od_day_m$ORIGIN_SZ!=od_day_m$DESTIN_SZ,]
-od_day_a <- od_day_a[od_day_a$ORIGIN_SZ!=od_day_a$DESTIN_SZ,]
-od_end_m <- od_end_m[od_end_m$ORIGIN_SZ!=od_end_m$DESTIN_SZ,]
-od_end_a <- od_end_a[od_end_a$ORIGIN_SZ!=od_end_a$DESTIN_SZ,]
+#| code-fold: true
+#| code-summary: "Show the code"
+od_day_m4 <- od_day_m3[od_day_m3$ORIGIN_SZ!=od_day_m3$DESTIN_SZ,]
+od_day_a4 <- od_day_a3[od_day_a3$ORIGIN_SZ!=od_day_a3$DESTIN_SZ,]
+od_end_m4 <- od_end_m3[od_end_m3$ORIGIN_SZ!=od_end_m3$DESTIN_SZ,]
+od_end_a4 <- od_end_a3[od_end_a3$ORIGIN_SZ!=od_end_a3$DESTIN_SZ,]
 ```
 
 ## 4.2 **Creating desire lines**
@@ -373,16 +399,18 @@ od_end_a <- od_end_a[od_end_a$ORIGIN_SZ!=od_end_a$DESTIN_SZ,]
 In this code chunk below, `od2line()` of **stplanr** package is used to create the desire lines.
 
 ```{r}
-flowLine_day_m <- od2line(flow = od_day_m, 
+#| code-fold: true
+#| code-summary: "Show the code"
+flowLine_day_m <- od2line(flow = od_day_m4, 
                     zones = mpsz,
                     zone_code = "SUBZONE_C")
-flowLine_day_a <- od2line(flow = od_day_a, 
+flowLine_day_a <- od2line(flow = od_day_a4, 
                     zones = mpsz,
                     zone_code = "SUBZONE_C")
-flowLine_end_m <- od2line(flow = od_end_m, 
+flowLine_end_m <- od2line(flow = od_end_m4, 
                     zones = mpsz,
                     zone_code = "SUBZONE_C")
-flowLine_end_a <- od2line(flow = od_end_a, 
+flowLine_end_a <- od2line(flow = od_end_a4, 
                     zones = mpsz,
                     zone_code = "SUBZONE_C")
 ```
@@ -532,4 +560,635 @@ tm_shape() +
            scale = c(0.1, 1, 3, 5, 7, 10),
            n = 6,
            alpha = 1)
+```
+
+# 5 FURTHER ANALYSIS
+
+## 5.1 Geospatial
+
+For geospatial, following data is used:
+
+### 5.1.1 Business
+
+```{r}
+business <- st_read(dsn = "data/geospatial",
+                   layer = "Business") %>%
+  st_transform(crs = 3414)
+```
+
+```{r}
+hexagon_busstop$`BUSINESS_COUNT`<- lengths(
+  st_intersects(
+    hexagon_busstop, business))
+```
+
+```{r}
+summary(hexagon_busstop$BUSINESS_COUNT)
+```
+
+```{r}
+tmap_mode("plot")
+tm_shape(mpsz) +
+  tm_polygons() +
+tm_shape(hexagon_busstop) +
+  tm_polygons() +
+tm_shape(business) +
+  tm_dots() 
+```
+
+### 5.1.2 Entertainment
+
+```{r}
+entertn <- st_read(dsn = "data/geospatial",
+                   layer = "entertn") %>%
+  st_transform(crs = 3414)
+```
+
+```{r}
+hexagon_busstop$`ENTERTN_COUNT`<- lengths(
+  st_intersects(
+    hexagon_busstop, entertn))
+```
+
+```{r}
+summary(hexagon_busstop$ENTERTN_COUNT)
+```
+
+```{r}
+tmap_mode("plot")
+tm_shape(mpsz) +
+  tm_polygons() +
+tm_shape(hexagon_busstop) +
+  tm_polygons() +
+tm_shape(entertn) +
+  tm_dots() 
+```
+
+### 5.1.3 Food and beverage outlets
+
+```{r}
+fb <- st_read(dsn = "data/geospatial",
+                   layer = "F&B") %>%
+  st_transform(crs = 3414)
+```
+
+```{r}
+hexagon_busstop$`FB_COUNT`<- lengths(
+  st_intersects(
+    hexagon_busstop, fb))
+```
+
+```{r}
+summary(hexagon_busstop$FB_COUNT)
+```
+
+```{r}
+tmap_mode("plot")
+tm_shape(mpsz) +
+  tm_polygons() +
+tm_shape(hexagon_busstop) +
+  tm_polygons() +
+tm_shape(fb) +
+  tm_dots() 
+```
+
+### 5.1.4 Financial services
+
+```{r}
+fs <- st_read(dsn = "data/geospatial",
+                   layer = "FinServ") %>%
+  st_transform(crs = 3414)
+```
+
+```{r}
+hexagon_busstop$`FINSERV_COUNT`<- lengths(
+  st_intersects(
+    hexagon_busstop, fs))
+```
+
+```{r}
+summary(hexagon_busstop$FINSERV_COUNT)
+```
+
+```{r}
+tmap_mode("plot")
+tmap_options(check.and.fix = TRUE)
+tm_shape(mpsz) +
+  tm_polygons() +
+tm_shape(hexagon_busstop) +
+  tm_polygons() +
+tm_shape(fs) +
+  tm_dots() 
+```
+
+### 5.1.5 Leisure and recreation centres
+
+```{r}
+lr <- st_read(dsn = "data/geospatial",
+                   layer = "Liesure&Recreation") %>%
+  st_transform(crs = 3414)
+```
+
+```{r}
+hexagon_busstop$`LR_COUNT`<- lengths(
+  st_intersects(
+    hexagon_busstop, lr))
+```
+
+```{r}
+summary(hexagon_busstop$LR_COUNT)
+```
+
+```{r}
+tmap_mode("plot")
+tmap_options(check.and.fix = TRUE)
+tm_shape(mpsz) +
+  tm_polygons() +
+tm_shape(hexagon_busstop) +
+  tm_polygons() +
+tm_shape(lr) +
+  tm_dots() 
+```
+
+### 5.1.6 Retail and services stores/outlets
+
+```{r}
+rt <- st_read(dsn = "data/geospatial",
+                   layer = "Retails") %>%
+  st_transform(crs = 3414)
+```
+
+```{r}
+hexagon_busstop$`RETAIL_COUNT`<- lengths(
+  st_intersects(
+    hexagon_busstop, rt))
+```
+
+```{r}
+summary(hexagon_busstop$RETAIL_COUNT)
+```
+
+```{r}
+tmap_mode("plot")
+tmap_options(check.and.fix = TRUE)
+tm_shape(mpsz) +
+  tm_polygons() +
+tm_shape(hexagon_busstop) +
+  tm_polygons() +
+tm_shape(rt) +
+  tm_dots() 
+```
+
+## 5.2 Aspatial
+
+For aspatial, I will be using the following:
+
+### 5.2.1 HDB
+
+```{r}
+data <- read.csv("data/aspatial/hdb.csv")
+```
+
+```{r}
+coordinates <- data[, c("lng", "lat")]  
+spatial_points <- SpatialPointsDataFrame(coordinates, data)
+```
+
+```{r}
+
+# Create a SpatialPoints object
+coordinates <- data[, c("lng", "lat")]
+spatial_points <- SpatialPoints(coords = coordinates)
+
+# Define the current CRS (WGS84 - EPSG:4326)
+proj4string(spatial_points) <- CRS("+proj=longlat +datum=WGS84")
+
+# Convert SpatialPoints to an sf object
+sf_points <- st_as_sf(spatial_points)
+
+# Define EPSG:3414 CRS
+epsg_3414_crs <- st_crs(3414)
+
+# Transform the sf object to EPSG:3414
+sf_points_3414 <- st_transform(sf_points, crs = epsg_3414_crs)
+
+# Convert back to SpatialPoints
+spatial_points_3414 <- as(sf_points_3414, "Spatial")
+
+
+```
+
+```{r}
+tmap_mode("plot")
+tm_shape(mpsz) +
+  tm_polygons() +
+tm_shape(hexagon_busstop) +
+  tm_polygons() +
+tm_shape(spatial_points_3414) +
+  tm_dots()
+```
+
+```{r}
+sf_spatial_points_3414 <- st_as_sf(spatial_points_3414)
+
+intersections <- st_intersects(hexagon_busstop, sf_spatial_points_3414)
+
+hexagon_busstop$HDB_COUNT <- lengths(intersections)
+```
+
+```{r}
+summary(hexagon_busstop$HDB_COUNT)
+```
+
+### 5.2.2 School Directory and Information
+
+Concepts learned from In-Class Ex 4 will be used to extract the data from SLA API
+
+```{r}
+url<-"https://www.onemap.gov.sg/api/common/elastic/search"
+
+csv<-read_csv("data/aspatial/Generalinformationofschools.csv")
+postcodes<-csv$`postal_code`
+
+found<-data.frame()
+not_found<-data.frame()
+
+for(postcode in postcodes){
+  query<-list('searchVal'=postcode,'returnGeom'='Y','getAddrDetails'='Y','pageNum'='1')
+  res<- GET(url,query=query)
+  
+  if((content(res)$found)!=0){
+    found<-rbind(found,data.frame(content(res))[4:13])
+  } else{
+    not_found = data.frame(postcode)
+  }
+}
+```
+
+Next, combine both *found* and *not_found* data.frames into *merged* and write *merged* and *not_found* into two separate csv files named *schools* and *not_found*.
+
+for 'ZHENGHUA SECONDARY SCHOOL', manually update latitude and longitude for it:
+
+-   Latitude: 1.389279
+
+-   Longitude: 103.7651
+
+```{r}
+merged = merge(csv, found, by.x = 'postal_code', by.y = 'results.POSTAL', all = TRUE)
+merged1 <- merged %>%
+  mutate(
+    results.LATITUDE = ifelse(school_name == "ZHENGHUA SECONDARY SCHOOL", 1.389279, results.LATITUDE),
+    results.LONGITUDE = ifelse(school_name == "ZHENGHUA SECONDARY SCHOOL", 103.7651, results.LONGITUDE)
+  )
+write.csv(merged1, file = "data/aspatial/schools.csv")
+write.csv(not_found, file = "data/aspatial/not_found.csv")
+```
+
+Next, I will import *schools1.csv* into R environment and at the same time tidying the data by selecting only the necessary fields as well as rename some fields.
+
+```{r}
+schools <- read_csv("data/aspatial/schools.csv") %>%
+  rename(latitude = "results.LATITUDE",
+         longitude = "results.LONGITUDE")%>%
+  select(postal_code, school_name, latitude, longitude)
+```
+
+I convert schools into a simple feature data.frame called *schools_sf* by using values in latitude and longitude fields.
+
+```{r}
+schools_sf <- st_as_sf(schools, 
+                       coords = c("longitude", "latitude"),
+                       crs=4326) %>%
+  st_transform(crs = 3414)
+```
+
+Plot is shown below:
+
+```{r}
+tmap_options(check.and.fix = TRUE)
+tm_shape(mpsz) +
+  tm_polygons() +
+tm_shape(hexagon_busstop) +
+  tm_polygons() +
+tm_shape(schools_sf) +
+  tm_dots()
+```
+
+I will count count the number of schools located inside the hexagon layer.
+
+```{r}
+hexagon_busstop$`SCHOOL_COUNT`<- lengths(
+  st_intersects(
+    hexagon_busstop, schools_sf))
+```
+
+I will examine the summary statistics of the derived variable.
+
+```{r}
+summary(hexagon_busstop$`SCHOOL_COUNT`)
+```
+
+The data will be joined with od_data:
+
+```{r}
+hexagon_busstop_tidy <- hexagon_busstop %>%
+  st_drop_geometry() %>%
+  select(FID, SCHOOL_COUNT, HDB_COUNT, BUSINESS_COUNT, ENTERTN_COUNT,  FB_COUNT,  FINANCE_COUNT, LR_COUNT, RETAIL_COUNT)
+```
+
+```{r}
+flow_data <- od_day_m1 %>%
+  left_join(hexagon_busstop_tidy,
+            by = c("FID.y" = "FID"))
+```
+
+```{r}
+summary(flow_data)
+```
+
+The code chunk below will be used to replace zero values to 0.99.
+
+```{r}
+flow_data <- flow_data %>%
+  mutate(across(c(SCHOOL_COUNT, HDB_COUNT, BUSINESS_COUNT, ENTERTN_COUNT,  FB_COUNT,  FINANCE_COUNT, LR_COUNT, RETAIL_COUNT), ~ ifelse(. == 0, 0.99, .)))
+
+```
+
+```{r}
+summary(flow_data)
+```
+
+Next we will remove duplicate record:
+
+```{r}
+duplicate <- flow_data %>%
+  group_by_all() %>%
+  filter(n()>1) %>%
+  ungroup()
+```
+
+```{r}
+flow_data <- unique(flow_data)
+```
+
+```{r}
+summary(flow_data)
+```
+
+I will save flow_data sf tibble data.frame into an rds file and call the file *flow_data_tidy*.
+
+```{r}
+write_rds(flow_data,
+          "data/rds/flow_data_tidy.rds")
+```
+
+The explanatory variables to be used in the **Spatial Interaction Modelling** will be :
+
+1.  HDB
+2.  School Directory and information
+3.  Business
+4.  Entertainment
+5.  Food and beverage outlets
+6.  Finance services
+7.  Leisure and recreation centres
+8.  Retail and services stores/outlets
+
+# 6 **Computing Distance Matrix**
+
+## 6.1 **Converting from sf data.table to SpatialPolygonsDataFrame**
+
+First [`as.Spatial()`](https://r-spatial.github.io/sf/reference/coerce-methods.html) will be used to convert *mpsz* from sf tibble data frame to SpatialPolygonsDataFrame of sp object as shown in the code chunk below
+
+```{r}
+hexagon_busstop_sp <- as(hexagon_busstop, "Spatial")
+hexagon_busstop_sp
+```
+
+## 6.2 **Computing the distance matrix**
+
+Next, [`spDists()`](https://www.rdocumentation.org/packages/sp/versions/2.1-1/topics/spDistsN1) of sp package will be used to compute the Euclidean distance between the centroids of the hexagon layer.
+
+```{r}
+dist <- spDists(hexagon_busstop_sp, 
+                longlat = FALSE)
+head(dist, n=c(10, 10))
+```
+
+Next, I will rename column and rows based on FID
+
+```{r}
+sz_names <- hexagon_busstop$FID
+```
+
+```{r}
+colnames(dist) <- paste0(sz_names)
+rownames(dist) <- paste0(sz_names)
+```
+
+Next, we will pivot the distance matrix into a long table by using the row and column subzone codes as show in the code chunk below.
+
+```{r}
+distPair <- melt(dist) %>%
+  rename(dist = value)
+head(distPair, 10)
+```
+
+To update the intra-zonal distances, I will select and find out the minimum value of the distance by using `summary()`.
+
+```{r}
+distPair %>%
+  filter(dist > 0) %>%
+  summary()
+```
+
+Next, a constant distance value of 300m is added into intra-zones distance.
+
+```{r}
+distPair$dist <- ifelse(distPair$dist == 0,
+                        300, distPair$dist)
+```
+
+The code chunk below will be used to check the result data.frame.
+
+```{r}
+distPair %>%
+  summary()
+```
+
+The code chunk below is used to rename the origin and destination fields.
+
+```{r}
+distPair <- distPair %>%
+  rename(orig = Var1,
+         dest = Var2)
+```
+
+Lastly, the code chunk below is used to save the dataframe for future use.
+
+```{r}
+write_rds(distPair, "data/rds/distPair.rds") 
+```
+
+# 7 Spatial Interaction Modelling
+
+## 7.1 Preparing Flow Data
+
+```{r}
+head(flow_data, 10)
+```
+
+### **7.1.1 Separating intra-flow from passenger volume df**
+
+Code chunk below is used to add three new fields in `flow_data` dataframe.
+
+```{r}
+flow_data$FlowNoIntra <- ifelse(
+  flow_data$FID.x == flow_data$FID.y, 
+  0, flowLine_day_m$MORNING_PEAK)
+flow_data$offset <- ifelse(
+  flow_data$FID.x == flow_data$FID.y, 
+  0.000001, 1)
+```
+
+### 7.1.2 **Combining flow data with distance value**
+
+```{r}
+flow_data$FID.x <- as.factor(flow_data$FID.x)
+flow_data$FID.y <- as.factor(flow_data$FID.y)
+```
+
+Now, `left_join()` of **dplyr** will be used to *flow_data* dataframe and *distPair* dataframe. The output is called *flow_data1*.
+
+```{r}
+flow_data$FID.x <- as.integer(as.character(flow_data$FID.x))
+flow_data$FID.y <- as.integer(as.character(flow_data$FID.y))
+
+
+flow_data1 <- flow_data %>%
+  left_join (distPair,
+             by = c("FID.x" = "orig",
+                    "FID.y" = "dest"))
+```
+
+We will remove duplicate
+
+```{r}
+duplicate <- flow_data1 %>%
+  group_by_all() %>%
+  filter(n()>1) %>%
+  ungroup()
+```
+
+```{r}
+flow_data1 <- unique(flow_data1)
+```
+
+We will called the output data file *SIM_data*. it is in rds data file format.
+
+```{r}
+write_rds(flow_data1, "data/rds/SIM_data.rds")
+```
+
+## **7.2 Adjusting Spatial Interaction Models**
+
+### 7.2.1 **Importing the modelling data**
+
+```{r}
+SIM_data <- read_rds("data/rds/SIM_data.rds")
+```
+
+### 7.2.2 **Visualising the dependent variable**
+
+```{r}
+ggplot(data = SIM_data,
+       aes(x = FlowNoIntra)) +
+  geom_histogram()
+```
+
+Notice that the distribution is highly skewed and not resemble bell shape or also known as normal distribution.
+
+Next, let us visualise the relation between the dependent variable and one of the key independent variable in Spatial Interaction Model, namely distance.
+
+```{r}
+ggplot(data = SIM_data,
+       aes(x = dist,
+           y = FlowNoIntra)) +
+  geom_point() +
+  geom_smooth(method = lm)
+```
+
+.
+
+### **7.2.3 Checking for variables with zero values**
+
+Since Poisson Regression is based of log and log 0 is undefined, it is important for us to ensure that no 0 values in the explanatory variables.
+
+In the code chunk below, summary() of Base R is used to compute the summary statistics of all variables in *SIM_data* data frame.
+
+```{r}
+summary(SIM_data)
+```
+
+Change FID.x and FID.y to character
+
+```{r}
+SIM_data$FID.x <- as.character(SIM_data$FID.x)
+SIM_data$FID.y <- as.character(SIM_data$FID.y)
+```
+
+Inter-zonal flow will be selected from flow_data and save into a new output data.frame called *inter_zonal_flow* by using the code chunk below.
+
+```{r}
+inter_zonal_flow <- SIM_data %>%
+  filter(FlowNoIntra > 0)
+```
+
+```{r}
+summary(inter_zonal_flow)
+```
+
+Remove NA:
+
+```{r}
+inter_zonal_flow <- na.omit(inter_zonal_flow)
+```
+
+```{r}
+summary(inter_zonal_flow)
+```
+
+## 7.3 **Origin (Production) constrained SIM**
+
+The code chunk used to calibrate to model is shown below. FID.x is the origin:
+
+```{r}
+orcSIM <- glm(formula = FlowNoIntra ~ 
+                  FID.x +
+                  log(SCHOOL_COUNT)+
+                  log(BUSINESS_COUNT)+
+                  log(ENTERTN_COUNT)+
+                  log(HDB_COUNT)+
+                  log(FB_COUNT)+
+                  log(FINANCE_COUNT)+
+                  log(LR_COUNT)+
+                  log(RETAIL_COUNT)+
+                  log(dist) - 1,
+              family = poisson(link = "log"),
+              data = inter_zonal_flow,
+              na.action = na.exclude)
+summary(orcSIM)
+```
+
+### 7.3.1 **Goodness of fit**
+
+```{r}
+CalcRSquared <- function(observed, estimated){
+  r <- cor(observed, estimated)
+  R2 <- r^2
+  R2
+}
+```
+
+```{r}
+CalcRSquared(orcSIM$model$FlowNoIntra, orcSIM$fitted.values)
 ```
