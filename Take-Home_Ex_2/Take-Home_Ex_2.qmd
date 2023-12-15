@@ -739,17 +739,18 @@ tm_shape(rt) +
   tm_dots() 
 ```
 
-## 5.2 Aspatial
+## `5.2 Aspatial`
 
-For aspatial, I will be using the following:
+`For aspatial, I will be using the following:`
 
-### 5.2.1 HDB
+### `5.2.1 HDB`
 
 ```{r}
 data <- read.csv("data/aspatial/hdb.csv")
 ```
 
 ```{r}
+library(sp)
 coordinates <- data[, c("lng", "lat")]  
 spatial_points <- SpatialPointsDataFrame(coordinates, data)
 ```
@@ -805,6 +806,9 @@ summary(hexagon_busstop$HDB_COUNT)
 Concepts learned from In-Class Ex 4 will be used to extract the data from SLA API
 
 ```{r}
+#| code-fold: true
+#| code-summary: "Show the code"
+library(httr)
 url<-"https://www.onemap.gov.sg/api/common/elastic/search"
 
 csv<-read_csv("data/aspatial/Generalinformationofschools.csv")
@@ -893,7 +897,7 @@ The data will be joined with od_data:
 ```{r}
 hexagon_busstop_tidy <- hexagon_busstop %>%
   st_drop_geometry() %>%
-  select(FID, SCHOOL_COUNT, HDB_COUNT, BUSINESS_COUNT, ENTERTN_COUNT,  FB_COUNT,  FINANCE_COUNT, LR_COUNT, RETAIL_COUNT)
+  select(FID, SCHOOL_COUNT, HDB_COUNT, BUSINESS_COUNT, ENTERTN_COUNT,  FB_COUNT,  FINSERV_COUNT, LR_COUNT, RETAIL_COUNT)
 ```
 
 ```{r}
@@ -910,7 +914,7 @@ The code chunk below will be used to replace zero values to 0.99.
 
 ```{r}
 flow_data <- flow_data %>%
-  mutate(across(c(SCHOOL_COUNT, HDB_COUNT, BUSINESS_COUNT, ENTERTN_COUNT,  FB_COUNT,  FINANCE_COUNT, LR_COUNT, RETAIL_COUNT), ~ ifelse(. == 0, 0.99, .)))
+  mutate(across(c(SCHOOL_COUNT, HDB_COUNT, BUSINESS_COUNT, ENTERTN_COUNT,  FB_COUNT,  FINSERV_COUNT, LR_COUNT, RETAIL_COUNT), ~ ifelse(. == 0, 0.99, .)))
 
 ```
 
@@ -953,7 +957,7 @@ The explanatory variables to be used in the **Spatial Interaction Modelling** wi
 7.  Leisure and recreation centres
 8.  Retail and services stores/outlets
 
-# 6 **Computing Distance Matrix**
+# 6 **COMPUTING DISTANCE MATRIX**
 
 ## 6.1 **Converting from sf data.table to SpatialPolygonsDataFrame**
 
@@ -988,6 +992,7 @@ rownames(dist) <- paste0(sz_names)
 Next, we will pivot the distance matrix into a long table by using the row and column subzone codes as show in the code chunk below.
 
 ```{r}
+library(reshape2)
 distPair <- melt(dist) %>%
   rename(dist = value)
 head(distPair, 10)
@@ -1029,7 +1034,7 @@ Lastly, the code chunk below is used to save the dataframe for future use.
 write_rds(distPair, "data/rds/distPair.rds") 
 ```
 
-# 7 Spatial Interaction Modelling
+# 7 SPATIAL INTERACTION MODELLING
 
 ## 7.1 Preparing Flow Data
 
@@ -1169,7 +1174,7 @@ orcSIM <- glm(formula = FlowNoIntra ~
                   log(ENTERTN_COUNT)+
                   log(HDB_COUNT)+
                   log(FB_COUNT)+
-                  log(FINANCE_COUNT)+
+                  log(FINSERV_COUNT)+
                   log(LR_COUNT)+
                   log(RETAIL_COUNT)+
                   log(dist) - 1,
@@ -1192,3 +1197,35 @@ CalcRSquared <- function(observed, estimated){
 ```{r}
 CalcRSquared(orcSIM$model$FlowNoIntra, orcSIM$fitted.values)
 ```
+
+All explanatory variables appear to be significant as their p-values are very small. In addition, the residual deviation of the model is large, which may indicate that the fit of the model needs to be improved or that there is overdispersion.
+
+```{r}
+summary_orcSIM <- summary(orcSIM)
+
+variables <- c("log(SCHOOL_COUNT)", "log(BUSINESS_COUNT)", "log(ENTERTN_COUNT)", "log(HDB_COUNT)", "log(FB_COUNT)", "log(FINSERV_COUNT)", "log(LR_COUNT)", "log(RETAIL_COUNT)")
+
+p_values <- summary_orcSIM$coefficients[variables, "Pr(>|z|)"]
+
+significant_vars <- names(p_values)[p_values < 0.05]
+
+significant_vars
+```
+
+```{r}
+predicted_values <- predict(orcSIM, type="response")
+actual_values <- inter_zonal_flow$FlowNoIntra
+
+plot(actual_values, predicted_values, xlab="Actual Values", ylab="Predicted Values")
+abline(0, 1)
+```
+
+# 8 CONCLUSION
+
+```{r}
+selected_variables <- c("log(SCHOOL_COUNT)", "log(BUSINESS_COUNT)", "log(ENTERTN_COUNT)", "log(HDB_COUNT)", "log(FB_COUNT)", "log(FINSERV_COUNT)", "log(LR_COUNT)", "log(RETAIL_COUNT)")
+summary_orcSIM$coefficients[selected_variables, ]
+
+```
+
+From the above results, we can see that school, Entertainment, Leisure and recreation centres, and Retail and services stores/outlets have a positive impact on the model; while business center, HDB, and Financial services have a negative impact on the model.
